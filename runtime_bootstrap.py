@@ -12,7 +12,20 @@ import sys
 from pathlib import Path
 
 
+def configure_console_streams() -> None:
+    """Prevent diagnostics from crashing on restrictive Windows code pages."""
+    for name in ("stdout", "stderr"):
+        stream = getattr(sys, name, None)
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(errors="backslashreplace")
+            except (OSError, ValueError):
+                pass
+
+
 def main() -> int:
+    configure_console_streams()
     runtime_dir = Path(sys.executable).resolve().parent
     bundle_root = runtime_dir.parent.parent if runtime_dir.name == "_internal" else runtime_dir.parent
     tool_dir = bundle_root / "tool"
