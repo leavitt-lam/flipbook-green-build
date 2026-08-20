@@ -1,0 +1,14 @@
+{
+  "name": "flipbook-tool",
+  "version": "3.7.0",
+  "description": "PDF → 交互画册本地转换器（绿色运行层、自适应清晰度、安卓离线桌面包）",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/detect.test.js tests/page-map.test.js tests/build.test.js && python3 -m unittest tests/test_enhanced.py"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "private": true
+}

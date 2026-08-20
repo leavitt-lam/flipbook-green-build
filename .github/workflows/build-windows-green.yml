@@ -1,0 +1,109 @@
+name: Build Windows Green Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install frozen runtime dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt pyinstaller
+
+      - name: Build stable runtime layer
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir `
+            --name FlipbookForgeRuntime `
+            --collect-all pymupdf `
+            --collect-all pypdfium2 `
+            --collect-all PIL `
+            --collect-all numpy `
+            runtime_bootstrap.py
+
+      - name: Assemble runtime and replaceable tool layers
+        shell: pwsh
+        run: |
+          $out = "release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL"
+          New-Item -ItemType Directory -Force "$out/runtime", "$out/tool", "$out/tools" | Out-Null
+          Copy-Item "dist/FlipbookForgeRuntime/*" "$out/runtime/" -Recurse -Force
+          Copy-Item "src" "$out/tool/src" -Recurse -Force
+          Copy-Item "libs" "$out/tool/libs" -Recurse -Force
+          Copy-Item "tests" "$out/tool/tests" -Recurse -Force
+          Copy-Item index.html,app.js,detect.js,enhanced_server.py,build.mjs,package.json,README.md "$out/tool/" -Force
+          Copy-Item "portable_assets/start.bat" "$out/start.bat" -Force
+          Copy-Item "portable_assets/update_tool.bat" "$out/update_tool.bat" -Force
+          Copy-Item "portable_assets/README.txt" "$out/README.txt" -Force
+
+      - name: Smoke-test frozen Windows runtime
+        shell: pwsh
+        run: |
+          $root = "release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL"
+          $stdoutLog = Join-Path $env:RUNNER_TEMP "flipbook-runtime.stdout.log"
+          $stderrLog = Join-Path $env:RUNNER_TEMP "flipbook-runtime.stderr.log"
+          $proc = Start-Process `
+            -FilePath "$root/runtime/FlipbookForgeRuntime.exe" `
+            -ArgumentList "--no-browser", "--port", "8899" `
+            -RedirectStandardOutput $stdoutLog `
+            -RedirectStandardError $stderrLog `
+            -PassThru
+          try {
+            $caps = $null
+            for ($i = 0; $i -lt 30; $i++) {
+              Start-Sleep -Milliseconds 500
+              try {
+                $caps = Invoke-RestMethod "http://127.0.0.1:8899/api/capabilities" -TimeoutSec 2
+                break
+              } catch {}
+            }
+            if (-not $caps) {
+              throw "Frozen runtime did not start. Logs:`n$(Get-Content $stdoutLog -Raw)`n$(Get-Content $stderrLog -Raw)"
+            }
+            if (-not $caps.enhanced) { throw "PyMuPDF is unavailable in the frozen runtime." }
+            if (-not $caps.pdfium) { throw "PDFium is unavailable in the frozen runtime." }
+            if (-not $caps.documentFontOcr) { throw "Built-in document-font OCR is unavailable." }
+            $page = Invoke-WebRequest "http://127.0.0.1:8899/index.html" -UseBasicParsing -TimeoutSec 5
+            if ($page.StatusCode -ne 200 -or $page.Content -notmatch "FLIPBOOK_FORGE v3.7.0") {
+              throw "Generator index.html smoke test failed."
+            }
+          } finally {
+            if ($proc -and -not $proc.HasExited) { Stop-Process -Id $proc.Id -Force }
+          }
+
+      - name: Create distributable ZIP and checksum
+        shell: pwsh
+        run: |
+          $folder = "release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL"
+          $zip = "release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL.zip"
+          Compress-Archive -Path "$folder/*" -DestinationPath $zip -Force
+          (Get-FileHash $zip -Algorithm SHA256).Hash + "  " + (Split-Path $zip -Leaf) |
+            Set-Content "release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL.sha256.txt" -Encoding ascii
+
+      - name: Upload Windows green package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FLIPBOOK_FORGE_v3.7.0_GREEN_FULL
+          path: |
+            release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL.zip
+            release/FLIPBOOK_FORGE_v3.7.0_GREEN_FULL.sha256.txt
+          if-no-files-found: error
+          retention-days: 30

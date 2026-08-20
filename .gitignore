@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.tmp_acceptance/
+build/
+dist/
+release/
+*.spec
+build_windows_portable.log
