@@ -36,10 +36,19 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 try:
-    import fitz  # PyMuPDF
-except Exception as exc:  # pragma: no cover - displayed by launcher
-    fitz = None
-    FITZ_IMPORT_ERROR = str(exc)
+    # PyMuPDF 1.24+ exposes ``pymupdf`` as the canonical package name.
+    # Importing it directly is also important for the portable build: the
+    # replaceable tool layer is loaded at runtime, so PyInstaller cannot see
+    # its legacy ``import fitz`` statement during static analysis.
+    import pymupdf as fitz
+except Exception as pymupdf_exc:  # pragma: no cover - compatibility fallback
+    try:
+        import fitz  # type: ignore[no-redef]
+    except Exception as fitz_exc:  # pragma: no cover - displayed by launcher
+        fitz = None
+        FITZ_IMPORT_ERROR = f"pymupdf: {pymupdf_exc}; fitz: {fitz_exc}"
+    else:
+        FITZ_IMPORT_ERROR = ""
 else:
     FITZ_IMPORT_ERROR = ""
 
@@ -734,8 +743,11 @@ def main() -> int:
     parser.add_argument("--no-browser", action="store_true")
     args = parser.parse_args()
     if fitz is None:
-        print("PyMuPDF 未安装。请先运行: python -m pip install -r requirements.txt")
-        print(FITZ_IMPORT_ERROR)
+        # Keep the bootstrap failure ASCII-safe.  GitHub's Windows runner can
+        # redirect output through cp1252, where printing Chinese text would
+        # otherwise raise UnicodeEncodeError and hide the real import error.
+        print("PyMuPDF is unavailable. Install requirements.txt or repair the bundled runtime.")
+        print("Import error:", ascii(FITZ_IMPORT_ERROR))
         return 2
     server = ThreadingHTTPServer((args.host, args.port), EnhancedHandler)
     url = f"http://{args.host}:{args.port}/index.html"
