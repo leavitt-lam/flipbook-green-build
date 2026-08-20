@@ -35,6 +35,7 @@ jobs:
           python -m PyInstaller --noconfirm --clean --onedir `
             --name FlipbookForgeRuntime `
             --collect-all pymupdf `
+            --hidden-import fitz `
             --collect-all pypdfium2 `
             --collect-all PIL `
             --collect-all numpy `
