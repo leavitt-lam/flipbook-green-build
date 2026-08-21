@@ -1,4 +1,4 @@
-FLIPBOOK_FORGE Windows green package
+PDF To Flipbook Studio Windows green package
 
 start.bat         Start the generator. It never installs or downloads anything.
 runtime/          Stable Python and native dependency layer.
