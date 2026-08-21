@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * flipbook_tool 构建脚本
+ * PDF To Flipbook Studio 构建脚本
  *
  * 输入（相对于本文件所在工程根）：
  *   src/converter.html        转换器页面（含 __VIEWER_TEMPLATE_JSON__ / __LIBS_PDFJS__ / __LIBS_WORKER__ / <!--__CONV_LIBS__--> 占位符）
