@@ -1,6 +1,6 @@
-# flipbook_tool v3.7.0
+# PDF To Flipbook Studio v3.7.0
 
-本地 PDF 交互画册生成器。v3.7.0 在 v3.6 的识别和渲染基础上加入 Windows 稳定运行层/可更新工具层、自适应文字清晰度，以及保留原版 HTML 的安卓离线 PWA 桌面包。
+本地 PDF 交互画册生成器，用于将 PDF 转换为可检索、可跳转、适合电脑与安卓平板离线阅读的交互画册。v3.7.0 在 v3.6 的识别和渲染基础上加入 Windows 稳定运行层/可更新工具层、自适应文字清晰度，以及保留原版 HTML 的安卓离线 PWA 桌面包。
 
 ## v3.7 新增
 
@@ -77,7 +77,7 @@ Android Edge 不能把 `file://` 文件直接安装为桌面 PWA，这是浏览�
 ## 目录结构
 
 ```text
-flipbook_tool_v3.7.0/
+PDF_To_Flipbook_Studio_v3.7.0/
 ├─ index.html                 生成器入口（最外层）
 ├─ 启动增强生成器.bat        Windows 推荐入口
 ├─ start-enhanced.sh          macOS / Linux 入口
