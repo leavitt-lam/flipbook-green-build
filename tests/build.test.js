@@ -12,7 +12,7 @@ test('生成器位于工程根目录且版本一致', () => {
   const pkg = JSON.parse(read('package.json'));
   assert.equal(pkg.version, '3.7.0');
   assert.ok(html.startsWith('<!DOCTYPE html>'));
-  assert.match(html, /FLIPBOOK_FORGE v3\.7\.0/);
+  assert.match(html, /PDF TO FLIPBOOK STUDIO v3\.7\.0/);
   assert.match(html, /<script src="libs\/jszip\.min\.js"><\/script>/);
   assert.match(html, /<script src="detect\.js"><\/script>/);
   assert.match(html, /<script src="app\.js"><\/script>/);

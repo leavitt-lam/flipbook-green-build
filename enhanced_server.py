@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""FLIPBOOK_FORGE v3.6 enhanced local server.
+"""PDF To Flipbook Studio enhanced local server.
 
 The browser editor remains the UI.  This localhost-only companion adds the
 operations that a sandboxed browser cannot do reliably:
@@ -651,7 +651,7 @@ def build_prepared_zip(source_pdf: Path, output_zip: Path, profile: str, preferr
 
 
 class EnhancedHandler(SimpleHTTPRequestHandler):
-    server_version = "FlipbookForge/3.7"
+    server_version = "PDFToFlipbookStudio/3.7"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(APP_ROOT), **kwargs)
@@ -737,7 +737,7 @@ class EnhancedHandler(SimpleHTTPRequestHandler):
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="FLIPBOOK_FORGE v3.7 enhanced local server")
+    parser = argparse.ArgumentParser(description="PDF To Flipbook Studio v3.7 enhanced local server")
     parser.add_argument("--host", default="127.0.0.1")
     parser.add_argument("--port", type=int, default=8765)
     parser.add_argument("--no-browser", action="store_true")
@@ -751,7 +751,7 @@ def main() -> int:
         return 2
     server = ThreadingHTTPServer((args.host, args.port), EnhancedHandler)
     url = f"http://{args.host}:{args.port}/index.html"
-    print(f"FLIPBOOK_FORGE v3.7 已启动: {url}")
+    print(f"PDF To Flipbook Studio v3.7 已启动: {url}")
     print("关闭此窗口即可停止。所有处理仅发生在本机。")
     if not args.no_browser:
         threading.Timer(0.5, lambda: webbrowser.open(url)).start()

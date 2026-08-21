@@ -1,7 +1,7 @@
 {
-  "name": "flipbook-tool",
+  "name": "pdf-to-flipbook-studio",
   "version": "3.7.0",
-  "description": "PDF → 交互画册本地转换器（绿色运行层、自适应清晰度、安卓离线桌面包）",
+  "description": "PDF To Flipbook Studio（绿色运行层、自适应清晰度、安卓离线桌面包）",
   "type": "module",
   "scripts": {
     "build": "node build.mjs",
