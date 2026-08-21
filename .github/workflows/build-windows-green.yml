@@ -29,6 +29,10 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt pyinstaller
 
+      - name: Build browser application from source
+        shell: pwsh
+        run: node build.mjs
+
       - name: Build stable runtime layer
         shell: pwsh
         run: |
